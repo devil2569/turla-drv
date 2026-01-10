@@ -1,5 +1,6 @@
 #pragma once
 #include "../windows_structs.hpp"
+#include <intrin.h>
 
 typedef enum {
     /**
@@ -95,15 +96,18 @@ typedef union {
 
 extern "C"
 {
-    uint16_t __readcs(void);
+    USHORT read_cs();
     void _cli(void);
     void _sti(void);
-    void __swapgs(void);
-    KPCR* __getpcr(void);
-
     void __sgdt(segment_descriptor_register_64* gdtr);
     void __lgdt(segment_descriptor_register_64* gdtr);
-
+    void swap_gs();
     void nmi_isr(void);
 
+}
+
+extern "C" uint64_t g_windows_nmi_handler;
+
+inline void* get_windows_nmi_handler(void) {
+    return (void*)g_windows_nmi_handler;
 }
