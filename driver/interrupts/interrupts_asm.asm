@@ -1,7 +1,14 @@
+OPTION CASEMAP:NONE
+
 PUBLIC nmi_isr
 EXTERN nmi_handler:PROC
+EXTERN g_nmi_shellcode:qword
 
-save_gprs MACRO
+PUBLIC read_cs
+PUBLIC swap_gs
+_TEXT SEGMENT
+
+nmi_isr PROC
     push rax
     push rbx
     push rcx
@@ -17,9 +24,11 @@ save_gprs MACRO
     push r13
     push r14
     push r15
-ENDM
 
-restore_gprs MACRO
+    sub rsp, 40h
+    call nmi_handler
+    add rsp, 40h
+
     pop r15
     pop r14
     pop r13
@@ -35,15 +44,20 @@ restore_gprs MACRO
     pop rcx
     pop rbx
     pop rax
-ENDM
 
-nmi_isr PROC
-    save_gprs
-
-    sub rsp, 40h
-    call nmi_handler ; emulate KiNmiInterrupt or use windows default nmi handler
-    add rsp, 40h
-
-    restore_gprs
-    iretq
+    jmp qword ptr [g_nmi_shellcode]
+    ; iretq
 nmi_isr ENDP
+
+read_cs PROC ; i dont have __readcs() in my intrin.h for some reason i guess..
+    mov ax, cs
+    ret
+read_cs ENDP
+
+swap_gs PROC
+    swapgs
+    ret
+swap_gs ENDP
+
+_TEXT ENDS
+END
